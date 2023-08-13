@@ -1,10 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require("fs");
-
+const path = require("path");
+const cors = require("cors");
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cors()); // IT will allow the any frontend request to access the backend functionality to avoid CORS error
 
 function findIndex(arr, id) {
   for (let i = 0; i < arr.length; i++) {
@@ -84,7 +86,7 @@ app.delete('/todos/:id', (req, res) => {
 
   fs.readFile("todos.json", "utf8", (err, data) => {
     if (err) throw err;
-    const todos = JSON.parse(data);
+    let todos = JSON.parse(data);
     const todoIndex = findIndex(todos, parseInt(req.params.id));
     if (todoIndex === -1) {
       res.status(404).send();
@@ -98,9 +100,17 @@ app.delete('/todos/:id', (req, res) => {
   });
 });
 
+/** 
+// This code will make both the frontend and bckend is running on the same host to avoid CORS error
+app.get("/",(req,res)=>{
+  res.sendFile(path.join(__dirname,"index.html"));
+})
+*/
+
 // for all other routes, return 404
 app.use((req, res, next) => {
   res.status(404).send();
 });
 
+app.listen(3000);
 module.exports = app;
